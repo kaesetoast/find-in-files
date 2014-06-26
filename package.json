@@ -20,5 +20,10 @@
   "bugs": {
     "url": "https://github.com/kaesetoast/find-in-files/issues"
   },
-  "homepage": "https://github.com/kaesetoast/find-in-files"
+  "homepage": "https://github.com/kaesetoast/find-in-files",
+  "devDependencies": {},
+  "dependencies": {
+    "find": "^0.1.5",
+    "q": "^1.0.1"
+  }
 }
