@@ -21,7 +21,13 @@
     "url": "https://github.com/kaesetoast/find-in-files/issues"
   },
   "homepage": "https://github.com/kaesetoast/find-in-files",
-  "devDependencies": {},
+  "devDependencies": {
+    "chai": "^1.9.1",
+    "coveralls": "^2.10.1",
+    "istanbul": "^0.2.11",
+    "mocha": "^1.20.1",
+    "mocha-lcov-reporter": "0.0.1"
+  },
   "dependencies": {
     "find": "^0.1.5",
     "q": "^1.0.1"

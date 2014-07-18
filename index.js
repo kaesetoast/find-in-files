@@ -23,6 +23,9 @@ exports.find = function (pattern, directory, fileFilter) {
     var regex = new RegExp(pattern, 'g'),
         matchedFiles = [],
         results = [];
+    if (typeof fileFilter === 'string') {
+        fileFilter = new RegExp(fileFilter);
+    }
     find.file(fileFilter, directory, function(files) {
         for (var i = files.length - 1; i >= 0; i--) {
             matchedFiles.push(readFile(files[i])
