@@ -2,8 +2,7 @@
 
 var find = require('find'),
     fs = require('fs'),
-    Q = require('q'),
-    deferred = Q.defer();
+    Q = require('q');
 
 function readFile(filename) {
     return Q.nfcall(fs.readFile, filename, 'utf-8');
@@ -22,7 +21,8 @@ function searchFile(data) {
 exports.find = function (pattern, directory, fileFilter) {
     var regex = new RegExp(pattern, 'g'),
         matchedFiles = [],
-        results = [];
+        results = [],
+        deferred = Q.defer();
     if (typeof fileFilter === 'string') {
         fileFilter = new RegExp(fileFilter);
     }
