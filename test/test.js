@@ -45,4 +45,22 @@ describe('find some test strings', function () {
             done();
         });
     });
+
+    it('should not find strings in the .js file', function (done) {
+        findInFiles.find(stringOne, '.', '.txt$')
+        .then(function(result) {
+            result['test/fileOne.txt'].count.should.equal(1);
+            result.should.not.have.property('test/fileOne.md');
+            done();
+        });
+    });
+
+    it('should find strings in all files', function (done) {
+        findInFiles.find(stringOne, '.')
+        .then(function(result) {
+            result['test/fileOne.txt'].count.should.equal(1);
+            result['test/fileOne.md'].count.should.equal(1);
+            done();
+        });
+    });
 });
