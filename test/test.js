@@ -55,6 +55,15 @@ describe('find some test strings', function () {
         });
     });
 
+	it('should accept a regex object for fileFilter', function (done) {
+		findInFiles.find(stringOne, '.', /.txt$/)
+		.then(function(result) {
+			result['test/fileOne.txt'].count.should.equal(1);
+			result.should.not.have.property('test/fileOne.md');
+			done();
+		});
+	});
+
     it('should find strings in all files', function (done) {
         findInFiles.find(stringOne, '.')
         .then(function(result) {

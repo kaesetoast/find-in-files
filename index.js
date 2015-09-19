@@ -25,7 +25,7 @@ exports.find = function (pattern, directory, fileFilter) {
         deferred = Q.defer();
     if (typeof fileFilter === 'string') {
         fileFilter = new RegExp(fileFilter);
-    } else {
+    } else if (typeof fileFilter === 'undefined') {
         fileFilter = new RegExp('.*');
     }
     find.file(fileFilter, directory, function(files) {
