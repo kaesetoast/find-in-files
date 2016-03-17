@@ -8,8 +8,8 @@ var chai = require('chai'),
     stringThree = 'This is in both files',
     stringFour = 'This is duplicate',
     ObjectOne = {
-        term: "dolor sit amet",
-        flags: "ig"
+        'term': "dolor sit amet",
+        'flags': "ig"
     };
 
 chai.should();
