@@ -16,8 +16,8 @@ The module exposes a simple find function that expects three parameters.
 find(pattern, directory, fileFilter)
 ```
 
-#### pattern [string]
-The string you want to search for.
+#### pattern [string|object]
+The string you want to search for or object to control regex flags
 
 #### directory [string]
 The directory you want to search in.
@@ -29,13 +29,14 @@ A regex you can pass in to only search in files matching the filter.
 var findInFiles = require('find-in-files');
 ```
 
-The find function returns a promise which will recieve the results object. The results object contains the matches and a count of matches per file.
+The find function returns a promise which will receive the results object. The results object contains the matches, count of matches per file and the lines that match.
 
 ```JavaScript
 {
     'fileOne.txt': {
         matches: ['found string'],
-        count: 1
+        count: 1,
+        lines: ['This line contains a found string.']
     }
 }
 ```
@@ -43,7 +44,21 @@ The find function returns a promise which will recieve the results object. The r
 ## Example
 
 ```JavaScript
-findInFiles.find('I'm Brian, and so's my wife!', '.', '.txt$')
+findInFiles.find("I'm Brian, and so's my wife!", '.', '.txt$')
+    .then(function(results) {
+        for (var result in results) {
+            var res = results[result];
+            console.log(
+                'found "' + res.matches[0] + '" ' + res.count
+                + ' times in "' + result + '"'
+            );
+        }
+    });
+```
+
+```JavaScript
+// Use object to set flags on regular expression. This one will ignore case.
+findInFiles.find({'term': "I'm Brian, and so's my wife!", 'flags': 'ig'}, '.', '.txt$')
     .then(function(results) {
         for (var result in results) {
             var res = results[result];
