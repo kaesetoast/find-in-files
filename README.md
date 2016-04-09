@@ -1,7 +1,7 @@
 find-in-files [![Build Status](https://travis-ci.org/kaesetoast/find-in-files.svg?branch=master)](https://travis-ci.org/kaesetoast/find-in-files) [![Coverage Status](https://img.shields.io/coveralls/kaesetoast/find-in-files.svg)](https://coveralls.io/r/kaesetoast/find-in-files)
 =============
 
-A simple tool to search text patterns across multiple files
+A simple tool to search text patterns across multiple files, asynchronously or synchronously
 
 ## Installation
 find-in-files is a node module available via npm. You can install it with
@@ -10,10 +10,13 @@ $ npm install --save find-in-files
 ```
 
 ## Usage
-The module exposes a simple find function that expects three parameters.
+The module exposes two simple functions which expect three parameters each.
 
 ```JavaScript
+// Async
 find(pattern, directory, fileFilter)
+// Sync
+findSync(pattern, directory, fileFilter)
 ```
 
 #### pattern [string|object]
@@ -29,7 +32,7 @@ A regex you can pass in to only search in files matching the filter.
 var findInFiles = require('find-in-files');
 ```
 
-The find function returns a promise which will receive the results object. The results object contains the matches, count of matches per file and the lines that match.
+Both functions return a promise which will receive the results object. The results object contains the matches, count of matches per file and the lines that match.
 
 ```JavaScript
 {
