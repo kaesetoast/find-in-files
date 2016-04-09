@@ -44,14 +44,11 @@ function getRegEx(pattern, regex) {
 
     grabLineRegEx = "(.*" + term + ".*)"
 
-    switch (regex) {
-        case 'line':
-            return new RegExp(grabLineRegEx, flags);
-            break;
-        default:
-            return new RegExp(term, flags);
-            break;
+    if (regex === 'line') {
+        return new RegExp(grabLineRegEx, flags)
     }
+
+    return new RegExp(term, flags);
 }
 
 function getMatchedFiles(pattern, files) {
