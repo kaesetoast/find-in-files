@@ -22,7 +22,16 @@ function searchFile(data) {
     };
 }
 
-exports.find = function(pattern, directory, fileFilter) {
+function getFileFilter(fileFilter) {
+    if (typeof fileFilter === 'string') {
+        fileFilter = new RegExp(fileFilter);
+    } else if (typeof fileFilter === 'undefined') {
+        fileFilter = new RegExp('.');
+    }
+    return fileFilter;
+}
+
+function getRegEx(pattern, regex) {
     var flags, term, grabLineRegEx
 
     if (typeof pattern === 'object' && pattern.flags) {
@@ -35,39 +44,67 @@ exports.find = function(pattern, directory, fileFilter) {
 
     grabLineRegEx = "(.*" + term + ".*)"
 
-    var regex = new RegExp(term, flags),
-        lineRegEx = new RegExp(grabLineRegEx, flags),
-        matchedFiles = [],
-        results = [],
-        deferred = Q.defer();
-    if (typeof fileFilter === 'string') {
-        fileFilter = new RegExp(fileFilter);
-    } else if (typeof fileFilter === 'undefined') {
-        fileFilter = new RegExp('.');
+    switch (regex) {
+        case 'line':
+            return new RegExp(grabLineRegEx, flags);
+            break;
+        default:
+            return new RegExp(term, flags);
+            break;
     }
-    find.file(fileFilter, directory, function(files) {
-        for (var i = files.length - 1; i >= 0; i--) {
-            matchedFiles.push(readFile(files[i])
-                .then(searchFile({
-                    regex: regex,
-                    lineRegEx: lineRegEx,
-                    filename: files[i]
-                })));
+}
+
+function getMatchedFiles(pattern, files) {
+    var matchedFiles = []
+
+    for (var i = files.length - 1; i >= 0; i--) {
+        matchedFiles.push(readFile(files[i])
+            .then(searchFile({
+                regex: getRegEx(pattern),
+                lineRegEx: getRegEx(pattern, 'line'),
+                filename: files[i]
+            })));
+    }
+
+    return matchedFiles;
+}
+
+function getResults(content) {
+    var results = []
+
+    for (var i = 0; i < content.length; i++) {
+        var fileMatch = content[i].value;
+        if (fileMatch.match !== null) {
+            results[fileMatch.filename] = {
+                matches: fileMatch.match,
+                count: fileMatch.match.length,
+                line: fileMatch.lines
+            };
         }
-        Q.allSettled(matchedFiles)
+    }
+
+    return results;
+}
+
+exports.find = function(pattern, directory, fileFilter) {
+    var deferred = Q.defer()
+
+    find.file(getFileFilter(fileFilter), directory, function(files) {
+        Q.allSettled(getMatchedFiles(pattern, files))
             .then(function(content) {
-                for (var i = 0; i < content.length; i++) {
-                    var fileMatch = content[i].value;
-                    if (fileMatch.match !== null) {
-                        results[fileMatch.filename] = {
-                            matches: fileMatch.match,
-                            count: fileMatch.match.length,
-                            line: fileMatch.lines
-                        };
-                    }
-                }
-                deferred.resolve(results);
+                deferred.resolve(getResults(content));
             });
     });
+    return deferred.promise;
+};
+
+exports.findSync = function(pattern, directory, fileFilter) {
+    var deferred = Q.defer(),
+        files = find.fileSync(getFileFilter(fileFilter), directory);
+
+    Q.allSettled(getMatchedFiles(pattern, files))
+        .then(function(content) {
+            deferred.resolve(getResults(content));
+        });
     return deferred.promise;
 };
