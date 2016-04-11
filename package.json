@@ -1,6 +1,6 @@
 {
   "name": "find-in-files",
-  "version": "0.2.1",
+  "version": "0.3.1",
   "description": "A simple tool to search text patterns across multiple files",
   "main": "index.js",
   "scripts": {
