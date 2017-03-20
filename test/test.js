@@ -10,15 +10,22 @@ var chai = require('chai'),
     ObjectOne = {
         'term': "dolor sit amet",
         'flags': "ig"
-    };
+    },
+    chaiAsPromised = require('chai-as-promised'),
+    expect = require('chai').expect;
 
+chai.use(chaiAsPromised);
 chai.should();
 
 ['find', 'findSync'].forEach(function(method) {
     describe('find some test strings (using "' + method + '")', function() {
         this.timeout(15000);
-        it('should find stringOne only in fileOne exactly one time', function(done) {
-            findInFiles[method](stringOne, '.', '.txt$')
+        it('should handle error properly', function() {
+            return expect(findInFiles[method](stringOne, 'directorydoesnotexist', '.txt$')).to.be.rejected;
+        });
+        
+        it('should find stringOne only in fileOne exactly one time', function() {
+            return findInFiles[method](stringOne, '.', '.txt$')
                 .then(function(result) {
                     var paths = constructPaths({
                         first: "fileOne.txt",
@@ -26,12 +33,11 @@ chai.should();
                     })
                     result[paths.first].count.should.equal(1);
                     result.should.not.have.property(paths.second);
-                    done();
                 });
         });
 
-        it('should find stringTwo only in fileTwo exactly one time', function(done) {
-            findInFiles[method](stringTwo, '.', '.txt$')
+        it('should find stringTwo only in fileTwo exactly one time', function() {
+            return findInFiles[method](stringTwo, '.', '.txt$')
                 .then(function(result) {
                     var paths = constructPaths({
                         first: "fileTwo.txt",
@@ -39,12 +45,11 @@ chai.should();
                     })
                     result[paths.first].count.should.equal(1);
                     result.should.not.have.property(paths.second);
-                    done();
                 });
         });
 
-        it('should find stringThree in both files exactly one time', function(done) {
-            findInFiles[method](stringThree, '.', '.txt$')
+        it('should find stringThree in both files exactly one time', function() {
+            return findInFiles[method](stringThree, '.', '.txt$')
                 .then(function(result) {
                     var paths = constructPaths({
                         first: "fileOne.txt",
@@ -52,12 +57,11 @@ chai.should();
                     })
                     result[paths.first].count.should.equal(1);
                     result[paths.second].count.should.equal(1);
-                    done();
                 });
         });
 
-        it('should find stringFour 2 times in fileOne and 3 times in fileTwo', function(done) {
-            findInFiles[method](stringFour, '.', '.txt$')
+        it('should find stringFour 2 times in fileOne and 3 times in fileTwo', function() {
+            return findInFiles[method](stringFour, '.', '.txt$')
                 .then(function(result) {
                     var paths = constructPaths({
                         first: "fileOne.txt",
@@ -65,12 +69,11 @@ chai.should();
                     })
                     result[paths.first].count.should.equal(2);
                     result[paths.second].count.should.equal(3);
-                    done();
                 });
         });
 
-        it('should not find strings in the .js file', function(done) {
-            findInFiles[method](stringOne, '.', '.txt$')
+        it('should not find strings in the .js file', function() {
+            return findInFiles[method](stringOne, '.', '.txt$')
                 .then(function(result) {
                     var paths = constructPaths({
                         first: "fileOne.txt",
@@ -78,12 +81,11 @@ chai.should();
                     })
                     result[paths.first].count.should.equal(1);
                     result.should.not.have.property(paths.second);
-                    done();
                 });
         });
 
-        it('should accept a regex object for fileFilter', function(done) {
-            findInFiles[method](stringOne, '.', /.txt$/)
+        it('should accept a regex object for fileFilter', function() {
+            return findInFiles[method](stringOne, '.', /.txt$/)
                 .then(function(result) {
 
                     var paths = constructPaths({
@@ -92,12 +94,11 @@ chai.should();
                     })
                     result[paths.first].count.should.equal(1);
                     result.should.not.have.property(paths.second);
-                    done();
                 });
         });
 
-        it('should find strings in all files', function(done) {
-            findInFiles[method](stringOne, 'test/')
+        it('should find strings in all files', function() {
+            return findInFiles[method](stringOne, 'test/')
                 .then(function(result) {
                     var paths = constructPaths({
                         first: "fileOne.txt",
@@ -105,12 +106,11 @@ chai.should();
                     })
                     result[paths.first].count.should.equal(1);
                     result[paths.second].count.should.equal(1);
-                    done();
                 });
         });
 
-        it('should find stringOne twice in fileOne since we are case insensative', function(done) {
-            findInFiles[method](ObjectOne, '.', '.txt$')
+        it('should find stringOne twice in fileOne since we are case insensative', function() {
+            return findInFiles[method](ObjectOne, '.', '.txt$')
                 .then(function(result) {
                     var paths = constructPaths({
                         first: "fileOne.txt",
@@ -118,7 +118,6 @@ chai.should();
                     })
                     result[paths.first].count.should.equal(2);
                     result.should.not.have.property(paths.second);
-                    done();
                 });
         });
     });

@@ -2,7 +2,8 @@
 
 var find = require('find'),
     fs = require('fs'),
-    Q = require('q');
+    Q = require('q'),
+    path = require('path');
 
 function readFile(filename) {
     return Q.nfcall(fs.readFile, filename, 'utf-8');
@@ -53,7 +54,6 @@ function getRegEx(pattern, regex) {
 
 function getMatchedFiles(pattern, files) {
     var matchedFiles = []
-
     for (var i = files.length - 1; i >= 0; i--) {
         matchedFiles.push(readFile(files[i])
             .then(searchFile({
@@ -85,23 +85,32 @@ function getResults(content) {
 
 exports.find = function(pattern, directory, fileFilter) {
     var deferred = Q.defer()
-
-    find.file(getFileFilter(fileFilter), directory, function(files) {
+    find
+    .file(getFileFilter(fileFilter), directory, function(files) {
         Q.allSettled(getMatchedFiles(pattern, files))
-            .then(function(content) {
-                deferred.resolve(getResults(content));
-            });
+        .then(function (content) {
+            deferred.resolve(getResults(content));
+        })
+        .done();
+    })
+    .error(function (err){
+        deferred.reject(err)
     });
     return deferred.promise;
 };
 
 exports.findSync = function(pattern, directory, fileFilter) {
-    var deferred = Q.defer(),
+    var deferred = Q.defer();
+    var files;
+    try {
         files = find.fileSync(getFileFilter(fileFilter), directory);
-
-    Q.allSettled(getMatchedFiles(pattern, files))
-        .then(function(content) {
+        Q.allSettled(getMatchedFiles(pattern, files))
+        .then(function (content) {
             deferred.resolve(getResults(content));
-        });
+        })
+        .done();
+    } catch (err) {
+        deferred.reject(err)
+    }
     return deferred.promise;
 };
