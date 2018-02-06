@@ -71,7 +71,7 @@ function getResults(content) {
 
     for (var i = 0; i < content.length; i++) {
         var fileMatch = content[i].value;
-        if (fileMatch.match !== null) {
+        if (fileMatch && fileMatch.match !== null) {
             results[fileMatch.filename] = {
                 matches: fileMatch.match,
                 count: fileMatch.match.length,
