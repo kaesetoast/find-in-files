@@ -67,7 +67,7 @@ function getMatchedFiles(pattern, files) {
 }
 
 function getResults(content) {
-    var results = []
+    var results = {}
 
     for (var i = 0; i < content.length; i++) {
         var fileMatch = content[i].value;
