@@ -1,39 +1,34 @@
-'use strict';
+'use strict'
 
-var find = require('find'),
+const find = require('find'),
     fs = require('fs'),
-    Q = require('q'),
-    path = require('path');
+    Q = require('q')
 
-function readFile(filename) {
-    return Q.nfcall(fs.readFile, filename, 'utf-8');
+function readFile (filename) {
+    return Q.nfcall(fs.readFile, filename, 'utf-8')
 }
 
-function searchFile(data) {
-    return function(content) {
-
-        var match = content.match(data.regex),
-            linesMatch = content.match(data.lineRegEx)
-
+function searchFile (data) {
+    return content => {
         return {
             filename: data.filename,
-            match: match,
-            lines: linesMatch
-        };
-    };
-}
-
-function getFileFilter(fileFilter) {
-    if (typeof fileFilter === 'string') {
-        fileFilter = new RegExp(fileFilter);
-    } else if (typeof fileFilter === 'undefined') {
-        fileFilter = new RegExp('.');
+            match: content.match(data.regex),
+            lines: content.match(data.lineRegEx)
+        }
     }
-    return fileFilter;
 }
 
-function getRegEx(pattern, regex) {
-    var flags, term, grabLineRegEx
+function getFileFilter (fileFilter) {
+    if (typeof fileFilter === 'string') {
+        fileFilter = new RegExp(fileFilter)
+    } else if (typeof fileFilter === 'undefined') {
+        fileFilter = new RegExp('.')
+    }
+    return fileFilter
+}
+
+function getRegEx (pattern, regex) {
+    let flags, term, grabLineRegEx
 
     if (typeof pattern === 'object' && pattern.flags) {
         term = pattern.term
@@ -43,74 +38,78 @@ function getRegEx(pattern, regex) {
         flags = 'g'
     }
 
-    grabLineRegEx = "(.*" + term + ".*)"
+    grabLineRegEx = '(.*' + term + '.*)'
 
     if (regex === 'line') {
         return new RegExp(grabLineRegEx, flags)
     }
 
-    return new RegExp(term, flags);
+    return new RegExp(term, flags)
 }
 
-function getMatchedFiles(pattern, files) {
-    var matchedFiles = []
-    for (var i = files.length - 1; i >= 0; i--) {
+function getMatchedFiles (pattern, files) {
+    let matchedFiles = []
+    for (let i = files.length - 1; i >= 0; i--) {
         matchedFiles.push(readFile(files[i])
             .then(searchFile({
                 regex: getRegEx(pattern),
                 lineRegEx: getRegEx(pattern, 'line'),
                 filename: files[i]
-            })));
+            })))
     }
 
-    return matchedFiles;
+    return matchedFiles
 }
 
-function getResults(content) {
-    var results = {}
+function getResults (content) {
+    let results = {}
 
-    for (var i = 0; i < content.length; i++) {
-        var fileMatch = content[i].value;
+    for (let i = 0; i < content.length; i++) {
+        let fileMatch = content[i].value
         if (fileMatch && fileMatch.match !== null) {
             results[fileMatch.filename] = {
                 matches: fileMatch.match,
                 count: fileMatch.match.length,
                 line: fileMatch.lines
-            };
+            }
         }
     }
 
-    return results;
+    return results
 }
 
-exports.find = function(pattern, directory, fileFilter) {
-    var deferred = Q.defer()
+exports.find = (pattern, directory, fileFilter) => {
+    let deferred = Q.defer()
     find
-    .file(getFileFilter(fileFilter), directory, function(files) {
-        Q.allSettled(getMatchedFiles(pattern, files))
-        .then(function (content) {
-            deferred.resolve(getResults(content));
+        .file(getFileFilter(fileFilter), directory, files => {
+            Q.allSettled(getMatchedFiles(pattern, files))
+                .then(content => deferred.resolve(getResults(content)))
+                .done()
         })
-        .done();
-    })
-    .error(function (err){
-        deferred.reject(err)
-    });
-    return deferred.promise;
-};
+        .error(err => deferred.reject(err))
+    return deferred.promise
+}
 
-exports.findSync = function(pattern, directory, fileFilter) {
-    var deferred = Q.defer();
-    var files;
+exports.findInFiles = (pattern, files) => {
+    let deferred = Q.defer()
+    Q.allSettled(getMatchedFiles(pattern, files))
+        .then(content => deferred.resolve(getResults(content)))
+        .done()
+    return deferred.promise
+}
+
+exports.findSync = (pattern, directory, fileFilter) => {
+    let deferred = Q.defer()
+    let files
     try {
-        files = find.fileSync(getFileFilter(fileFilter), directory);
+        files = find.fileSync(getFileFilter(fileFilter), directory)
         Q.allSettled(getMatchedFiles(pattern, files))
-        .then(function (content) {
-            deferred.resolve(getResults(content));
-        })
-        .done();
+            .then(function (content) {
+                deferred.resolve(getResults(content))
+            })
+            .done()
     } catch (err) {
         deferred.reject(err)
     }
-    return deferred.promise;
-};
+    return deferred.promise
+}
