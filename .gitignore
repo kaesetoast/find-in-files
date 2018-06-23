@@ -26,3 +26,7 @@ node_modules
 
 # SublimeText Project
 *.sublime*
+
+# JetBrains
+.idea
+*.iml
