@@ -59,6 +59,24 @@ findInFiles.find("I'm Brian, and so's my wife!", '.', '.txt$')
     });
 ```
 
+You can also use PDF and text files in the same time, just specify the root folder that contains them.
+```JavaScript
+findInFiles.find('duplicate', './test')
+    .then( results => {
+        for (let result in results) {
+            let res = results[result];
+            console.log(`found "${res.matches[0]}" ${res.count} times"${result}"`)
+        }
+    });
+
+    /* output:
+        found "duplicate" 1 times in "test/test.js"
+        found "duplicate" 3 times in "test/fileTwo.txt"
+        found "duplicate" 2 times in "test/fileOne.txt"
+        found "duplicate" 2 times in "test/fileOne.md"
+        found "duplicate" 3 times in "test/PDF_file.pdf" */
+```
+
 ```JavaScript
 // Use object to set flags on regular expression. This one will ignore case.
 findInFiles.find({'term': "I'm Brian, and so's my wife!", 'flags': 'ig'}, '.', '.txt$')
