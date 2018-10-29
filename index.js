@@ -3,17 +3,34 @@
 var find = require('find'),
     fs = require('fs'),
     Q = require('q'),
-    path = require('path');
+    path = require('path'),
+    extract = require('pdf-text-extract');
 
-function readFile(filename) {
-    return Q.nfcall(fs.readFile, filename, 'utf-8');
+    function readFile(filename) {
+        if(filename.match(/.*\.pdf$/gm))
+            return Q.nfcall(extract, filename);
+        else
+            return Q.nfcall(fs.readFile, filename, 'utf-8');
 }
 
 function searchFile(data) {
     return function(content) {
 
-        var match = content.match(data.regex),
+        var match = [], linesMatch = [];
+
+        if(data.filename.match(/.*\.pdf$/gm))
+        {
+            content.forEach((paragraph, i) => {
+                match.push.apply(match, paragraph.match(data.regex))
+                linesMatch.push.apply(linesMatch, paragraph.match(data.lineRegEx))
+        
+            });
+        }
+        else
+        {
+            match = content.match(data.regex)
             linesMatch = content.match(data.lineRegEx)
+        }
 
         return {
             filename: data.filename,
