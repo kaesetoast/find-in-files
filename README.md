@@ -39,7 +39,7 @@ Both functions return a promise which will receive the results object. The resul
     'fileOne.txt': {
         matches: ['found string'],
         count: 1,
-        lines: ['This line contains a found string.']
+        line: ['This line contains a found string.']
     }
 }
 ```
