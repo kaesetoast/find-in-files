@@ -32,7 +32,7 @@ function getFileFilter(fileFilter) {
     return fileFilter;
 }
 
-function getRegEx(pattern, regex) {
+function getRegEx(pattern, regex, caseSensitivity) {
     var flags, term, grabLineRegEx
 
     if (typeof pattern === 'object' && pattern.flags) {
@@ -40,7 +40,7 @@ function getRegEx(pattern, regex) {
         flags = pattern.flags
     } else {
         term = pattern
-        flags = 'g'
+        caseSensitivity ? flags = 'g' : flags = 'gi';
     }
 
     grabLineRegEx = "(.*" + term + ".*)"
@@ -52,13 +52,13 @@ function getRegEx(pattern, regex) {
     return new RegExp(term, flags);
 }
 
-function getMatchedFiles(pattern, files) {
+function getMatchedFiles(pattern, files, caseSensitivity) {
     var matchedFiles = []
     for (var i = files.length - 1; i >= 0; i--) {
         matchedFiles.push(readFile(files[i])
             .then(searchFile({
-                regex: getRegEx(pattern),
-                lineRegEx: getRegEx(pattern, 'line'),
+                regex: getRegEx(pattern, undefined, caseSensitivity),
+                lineRegEx: getRegEx(pattern, 'line', caseSensitivity),
                 filename: files[i]
             })));
     }
@@ -83,11 +83,11 @@ function getResults(content) {
     return results;
 }
 
-exports.find = function(pattern, directory, fileFilter) {
+exports.find = function(pattern, directory, fileFilter, caseSensitivity = true) {
     var deferred = Q.defer()
     find
     .file(getFileFilter(fileFilter), directory, function(files) {
-        Q.allSettled(getMatchedFiles(pattern, files))
+        Q.allSettled(getMatchedFiles(pattern, files, caseSensitivity))
         .then(function (content) {
             deferred.resolve(getResults(content));
         })
@@ -99,12 +99,12 @@ exports.find = function(pattern, directory, fileFilter) {
     return deferred.promise;
 };
 
-exports.findSync = function(pattern, directory, fileFilter) {
+exports.findSync = function(pattern, directory, fileFilter, caseSensitivity = true) {
     var deferred = Q.defer();
     var files;
     try {
         files = find.fileSync(getFileFilter(fileFilter), directory);
-        Q.allSettled(getMatchedFiles(pattern, files))
+        Q.allSettled(getMatchedFiles(pattern, files, caseSensitivity))
         .then(function (content) {
             deferred.resolve(getResults(content));
         })
