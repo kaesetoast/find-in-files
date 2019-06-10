@@ -32,7 +32,7 @@ function getFileFilter(fileFilter) {
     return fileFilter;
 }
 
-function getRegEx(pattern, regex, caseSensitivity) {
+function getRegEx(pattern, regex, isCaseSensitive) {
     var flags, term, grabLineRegEx
 
     if (typeof pattern === 'object' && pattern.flags) {
@@ -40,7 +40,7 @@ function getRegEx(pattern, regex, caseSensitivity) {
         flags = pattern.flags
     } else {
         term = pattern
-        caseSensitivity ? flags = 'g' : flags = 'gi';
+        isCaseSensitive ? flags = 'g' : flags = 'gi';
     }
 
     grabLineRegEx = "(.*" + term + ".*)"
@@ -52,13 +52,13 @@ function getRegEx(pattern, regex, caseSensitivity) {
     return new RegExp(term, flags);
 }
 
-function getMatchedFiles(pattern, files, caseSensitivity) {
+function getMatchedFiles(pattern, files, isCaseSensitive) {
     var matchedFiles = []
     for (var i = files.length - 1; i >= 0; i--) {
         matchedFiles.push(readFile(files[i])
             .then(searchFile({
-                regex: getRegEx(pattern, undefined, caseSensitivity),
-                lineRegEx: getRegEx(pattern, 'line', caseSensitivity),
+                regex: getRegEx(pattern, undefined, isCaseSensitive),
+                lineRegEx: getRegEx(pattern, 'line', isCaseSensitive),
                 filename: files[i]
             })));
     }
@@ -83,11 +83,12 @@ function getResults(content) {
     return results;
 }
 
-exports.find = function(pattern, directory, fileFilter, caseSensitivity = true) {
+exports.find = function(pattern, directory, fileFilter, isCaseSensitive) {
+    isCaseSensitive = typeof isCaseSensitive === 'undefined' ? true : isCaseSensitive;
     var deferred = Q.defer()
     find
     .file(getFileFilter(fileFilter), directory, function(files) {
-        Q.allSettled(getMatchedFiles(pattern, files, caseSensitivity))
+        Q.allSettled(getMatchedFiles(pattern, files, isCaseSensitive))
         .then(function (content) {
             deferred.resolve(getResults(content));
         })
@@ -99,12 +100,13 @@ exports.find = function(pattern, directory, fileFilter, caseSensitivity = true) 
     return deferred.promise;
 };
 
-exports.findSync = function(pattern, directory, fileFilter, caseSensitivity = true) {
+exports.findSync = function(pattern, directory, fileFilter, isCaseSensitive) {
+    isCaseSensitive = typeof isCaseSensitive === 'undefined' ? true : isCaseSensitive;
     var deferred = Q.defer();
     var files;
     try {
         files = find.fileSync(getFileFilter(fileFilter), directory);
-        Q.allSettled(getMatchedFiles(pattern, files, caseSensitivity))
+        Q.allSettled(getMatchedFiles(pattern, files, isCaseSensitive))
         .then(function (content) {
             deferred.resolve(getResults(content));
         })
